@@ -6,9 +6,9 @@ __lua__
 --
 
 -- Data
-#include source/business/utils/hitbox.p8
-#include source/business/utils/animation.p8
-#include source/business/player.p8
+#include source/business/utils/hitbox.lua
+#include source/business/utils/animation.lua
+#include source/business/player.lua
 
 
 player = Player:new(5,0,8,100,8,8,0.8,0,0.3,-4,true,0,"IDLE")
