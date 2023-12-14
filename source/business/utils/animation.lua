@@ -22,7 +22,7 @@ function Animation:new(name,sprites,sfx)
    o.name = name or ""
    o.sprites = sprites or {}
    o.sfx = sfx or 0
-
    --
+   
    return o
 end

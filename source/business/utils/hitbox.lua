@@ -19,6 +19,7 @@ function Hitbox:new(x,y,w,h)
    o.y = y or 0
    o.w = w or 0
    o.h = h or 0
+   --
    
    return o
 end
@@ -29,17 +30,17 @@ end
 
 
 function Hitbox:GetTopLeftCorner()
-   return {x,y}
+   return {self.x,self.y}
 end
 
 function Hitbox:GetTopRightCorner()
-   return {x+w,y}
+   return {self.x+self.w,self.y}
 end
 
 function Hitbox:GetBotLeftCorner()
-   return {x,y+h}
+   return {self.x,self.y+self.h}
 end
 
 function Hitbox:GetBotLeftCorner()
-   return {x+w,y+h}
+   return {self.x+self.w,self.y+self.h}
 end
