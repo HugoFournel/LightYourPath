@@ -5,12 +5,13 @@ __lua__
 -- by hav
 --
 
--- Data
-#include source/business/utils/hitbox.lua
+-- Linkage
 #include source/business/utils/animation.lua
 #include source/business/player.lua
+#include source/business/platform.lua
+#include source/business/level.lua
 
-
+-- Data
 player = Player:new(5,0,8,100,8,8,0.8,0,0.3,-4,true,0,"IDLE")
 endFlag    = {x = 125, y = 104, w = 1, h = 5}
 platforms = {}
@@ -71,8 +72,7 @@ function checkCollision()
   for i = 1, #platforms do
     local platform = platforms[i]
 
-    if player.x + player.w >= platform.x and player.x <= platform.x + platform.w and
-       player.y + player.h >= platform.y and player.y <= platform.y  then
+    if player:CheckCollision(platform) then
       -- Collision detectee : le joueur est sur une plateforme
        player.y = platform.y - player.h - 1
        player.vy = 0

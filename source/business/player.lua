@@ -22,7 +22,7 @@ Player =
       sprite            = 0,
       animation_list    = {},
       current_animation = Animation:new(),
-      last_animation    = Animation:new()
+      last_animation    = Animation:new(),
    }
 
 -- Constructor
@@ -54,14 +54,13 @@ end
 
 function Player:Movement()
    -- Horizontal
-   printh(self:GetHitbox().x,"@clip")
-   if btn(0) and self:GetHitbox().x >= 1 then
+   if btn(0) and self.x >= 1 then
      -- LEFT RUN
      self.x -= self.speed
      self.current_animation = self.animation_list["RUNLEFT"]
      self.last_animation = self.current_animation
      
-   elseif btn(1) and self:GetHitbox().x + self:GetHitbox().w <= 127 then
+   elseif btn(1) and self.x + self.w <= 127 then
      -- RIGHT RUN
      self.x += self.speed
      self.current_animation =  self.animation_list["RUNRIGHT"]
@@ -88,22 +87,12 @@ function Player:Movement()
   self.vy += self.gravity
   self.y += self.vy
 
-  -- Checking if player hit the ground
-  self:CheckGroundCollision()
+  -- Checking if player hit the floor
+  self:CheckFloorCollision()
   
 end
 
-function Player:CheckGroundCollision()
-  -- Ground collision
-  -- If ground collision then position is reset and health is decremented
-   if self:GetHitbox().y + self:GetHitbox().h >= 131 then
-     self.y = 110
-     self.x = 4
-     self.vy = 0
-     self.can_jump = true
-     self:TakeDamage(1)
-  end
-end
+
 
 -- Player health function
 
@@ -124,11 +113,30 @@ end
 
 -- Player collisions
 
--- Player hitbox rectangle coordinates 
-function Player:GetHitbox()
-   hitbox = Hitbox:new(self.x,self.y,self.w,self.h)
-   return hitbox
+-- Fonction de verification de collision
+function Player:CheckCollision(platform)
+   collision = false
+   -- Collision avec les plateformes
+     if self.x + self.w >= platform.x and self.x <= platform.x + platform.w and
+        self.y + self.h >= platform.y and self.y <= platform.y  then
+       -- Collision detectee : le joueur est sur une plateforme
+         collision = true
+     end  
+   return collision
 end
+ 
+
+ function Player:CheckFloorCollision()
+   -- Floor collision
+   -- If floor collision then position is reset and health is decremented
+    if self.y + self.h >= 131 then
+      self.y = 110
+      self.x = 4
+      self.vy = 0
+      self.can_jump = true
+      self:TakeDamage(1)
+   end
+ end
 
 
 --Player Animations
@@ -145,7 +153,7 @@ function Player:BuildAnimations()
    list["RUNLEFT"]   = run_left
    list["RUNRIGHT"]  = run_right
    list["IDLERIGHT"] = idle_right
-   list["IDLELEFT"] = idle_left
+   list["IDLELEFT"]  = idle_left
    
    return list
 end
@@ -158,21 +166,21 @@ function Player:Animate()
    is_in_list = false
    for i = 1, #player.current_animation.sprites do
       if player.sprite == player.current_animation.sprites[i] then
-	 is_in_list = true
+	      is_in_list = true
       end
    end
 
 
    -- Setting new sprite
-   if not is_in_list then
+   if not is_in_list or #player.current_animation.sprites == 1 then
       -- Setting sprite to the first animation s sprite
       player.sprite = player.current_animation.sprites[1]
    else
       -- Continue the animation by looping on the animation s sprites
-      if  player.current_animation.sprites[i] == player.current_animation.sprites[#player.current_animation.sprites] then
+      if  player.sprite == player.current_animation.sprites[#player.current_animation.sprites] then
          player.sprite =  player.current_animation.sprites[1]
       else
-	 player.sprite = player.current_animation.sprites[player.sprite+1]
+	      player.sprite = player.sprite + 1
       end
    end
 end
