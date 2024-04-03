@@ -100,6 +100,10 @@ function Player:TakeDamage(amount)
    self.health -= amount
    if not self:CheckDeath() then
       sfx(0)
+   else
+      sfx(2)
+      wait(200)
+      run()
    end
 end
 

@@ -12,162 +12,80 @@ __lua__
 #include source/business/level.lua
 
 -- Data
-player = Player:new(5,0,8,100,8,8,0.8,0,0.3,-4,true,0,"IDLE")
-endFlag    = {x = 125, y = 104, w = 1, h = 5}
-platforms = {}
-grounds   = {}
-discovered = {}
-lightLevel = true
 
+-- Initialisation du joueur (health,score,x,y,w,h,speed,vy,gravity,jump_force,can_jump,sprite)
+player = Player:new(5,0,8,100,8,8,0.8,0,0.3,-4,true,0,"IDLE")
+
+-- Initialisation du niveau de jeu (platforms, grounds, difficulty, endflags)
+level  = Level:new({},{},1,{})
+
+-- Ajout des terrains et plateformes
+level:AddGround(Platform:new(0, 110, 15, 20))
+level:AddGround(Platform:new(115, 110, 15, 20))
+level:AddPlatform(Platform:new(5, 75, 16, 2))
+level:AddPlatform(Platform:new(39, 105, 32, 2))
+level:AddPlatform(Platform:new(38, 65, 32, 2))
+level:AddPlatform(Platform:new(95, 50, 8, 2))
+level:AddEndFlag(Platform:new(125,104,1,5))
 
 -- Game update function 60 FPS
 
 function _update60()
   player:Movement()
-  checkCollision()
-  checkCollisionGround()
-  checkEnd()
+  level:CheckCollision(player)
 end
 
--- Game drawing functions 
 
 --Pico8 function
 function _draw()
 
-  if lightLevel then
+  cls()
 
-    cls()
+  -- Affichage des terrains 
+  drawPlatforms(level.grounds)
 
-    drawGround()
-
-    drawPlatforms()
+  -- Affichage des plateformes
+  drawPlatforms(level.platforms)
   
-    drawPlayer()
+  -- Affichage du joueur
+  drawPlayer(player)
   
-    drawEnd()
+  -- Affichage des arrivees
+  drawPlatforms(level.endflags)
 
-    print('score: '..player.score, 5, 1, 7)
-    print('vies: '..player.health, 5, 10, 8)
+  -- Affichage score et vies
+  print('score: '..player.score, 5, 1, 7)
+  print('vies: '..player.health, 5, 10, 8)
 
-  else
-
-    cls()
-
-    drawGround()
-
-    drawDiscovered()
-  
-    drawPlayer()
-  
-    drawEnd()
-
-    print('score: '..player.score, 5, 1, 7)
-    print('vies: '..player.health, 5, 10, 8)
-  end
 end
 
--- Fonction de verification de collision
-function checkCollision()
-  -- Collision avec les plateformes
-  for i = 1, #platforms do
-    local platform = platforms[i]
-
-    if player:CheckCollision(platform) then
-      -- Collision detectee : le joueur est sur une plateforme
-       player.y = platform.y - player.h - 1
-       player.vy = 0
-       player.can_jump = true
-       add(discovered,platform)
-    end  
-  end
-end
-
--- Fonction de verification de collision
-function checkCollisionGround()
-  -- Collision avec les plateformes
-  for i = 1, #grounds do
-    local ground = grounds[i]
-
-    if player.x + player.w >= ground.x and player.x <= ground.x + ground.w and
-       player.y + player.h >= ground.y and player.y <= ground.y + ground.h  then
-      -- Collision detectee : le joueur est sur une plateforme
-       player.y = ground.y - player.h - 1
-       player.vy = 0
-       player.can_jump = true
-    end  
-  end
-end
-
-
-function checkEnd()
-  if player.x + player.w >= endFlag.x and player.x <= endFlag.x + endFlag.w and
-       player.y + player.h >= endFlag.y and player.y <= endFlag.y + endFlag.h  then
-    lightLevel = not lightLevel
-    player.x = 4
-    player.y = 110
-    player.score += 1
-    discovered = {}
-  end
-end
 
 -- Fonction de rendu du joueur
-function drawPlayer()
+function drawPlayer(player)
    --Setting the current animation sprite
    player:Animate()
    --Draw the sprite
    spr(player.sprite,player.x, player.y)
 end
 
---Fonction de dessin de l arrivee du niveau
-
-function drawEnd()
-  rectfill(endFlag.x,endFlag.y,endFlag.x + endFlag.w, endFlag.y + endFlag.h, 8) -- Rectangle arrivee 
-end
 
 -- Fonction de rendu des plateformes
-function drawPlatforms()
+function drawPlatforms(platforms)
   for i = 1, #platforms do
     local platform = platforms[i]
-    rectfill(platform.x, platform.y, platform.x + platform.w, platform.y + platform.h, 7)  -- Rectangle plateforme
-  end
-end
-
--- Fonction de rendu des plateformes
-function drawDiscovered()
-  for i = 1, #discovered do
-    local platform = discovered[i]
-    rectfill(platform.x, platform.y, platform.x + platform.w, platform.y + platform.h, 7)  -- Rectangle plateforme
-  end
-end
-
-function drawGround()
-  for i = 1 , #grounds do
-    local ground = grounds[i]
-    rectfill(ground.x, ground.y, ground.x + ground.w, ground.y + ground.h, 7)  -- Rectangle plateforme
+    if platform.visible then
+      rectfill(platform.x, platform.y, platform.x + platform.w, platform.y + platform.h, 7)  -- Rectangle plateforme
+    end
   end
 end
 
 
--- Fonction d'ajout d'une plateforme
-function addPlatform(x, y, w, h)
-    local platform = {x = x, y = y, w = w, h = h}
-    add(platforms, platform)
-  end
+function wait(a)
+  for i = 1,a do 
+    flip() 
+  end 
+end
 
-function addGround(x, y, w, h)
-    local ground = {x = x, y = y, w = w, h = h}
-    add(grounds, ground)
-  end
-  
-
--- Appel de la fonction addPlatform pour ajouter les plateformes
-addGround(0, 110, 15, 20)  -- Plateforme sol 1
-addGround(115, 110, 15, 20)  -- Plateforme sol 2
-
-addPlatform(5, 75, 16, 2)  -- Plateforme intermediaire
-addPlatform(39, 105, 32, 2)  -- Plateforme intermediaire
-addPlatform(38, 65, 32, 2)  -- Plateforme intermediaire
-addPlatform(95, 50, 8, 2)  -- Plateforme intermediaire
 
 __gfx__
 00111100111111001111110011111100001111000011111100111111001111110011110000111100000000000000000000000000000000000000000000000000
@@ -312,3 +230,4 @@ __sfx__
 00050000000001d05019050140500f0500a0500605004050030500105000050000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 000400000f15011150141501715000500005000060000500006000050000500005000050000500005000050000500005000050000500005000050000500005000050000500005000050000500005000050000500
 001000002775023750217501f7501d7501b750187501675013750107500f7500e7500b75007750057500035000350003500670005700047000370002700017000670004700027000070000700000000000000000
+000600000a0500c05013050160501c0501f0502305028050300500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

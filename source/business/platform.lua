@@ -10,12 +10,13 @@ Platform =
       x =  0,
       y =  0,
       w =  0,
-      h =  0
+      h =  0,
+      visible = true
    }
 
 
 -- Constructor
-function Platform:new(x,y,w,h)
+function Platform:new(x,y,w,h,visible)
    local o = {}
    setmetatable(o, {__index = self})
 
@@ -24,6 +25,7 @@ function Platform:new(x,y,w,h)
    o.y = y or 0
    o.w = w or 0
    o.h = h or 0
+   o.visible = visible or true
    --
    
    return o
